@@ -71,8 +71,23 @@ namespace Ejercicio15.JuegoCoche
             };
             // Determinar las coordenadas en la cual se dibujará el techo del carro
             Rectangle techo = new Rectangle(X+6, 440, 13, 16);
+            #endregion
 
+            #region Diseño del auto
+            Pen contorno = new Pen(RGB);
+            Brush tech = new SolidBrush(RGB);
+            Brush parabrisas = new SolidBrush(Color.Black);
 
+            // Colocar el relleno para el auto
+            g.FillClosedCurve(Brushes.White, auto);
+            // Dibujar el contorno
+            g.DrawBeziers(contorno, auto);
+            // Rellenar el techo
+            g.FillRectangle(tech, techo);
+            // Dibujar el parabrisas
+            g.FillPolygon(parabrisas, ventSuperior);
+            // Dibujar el parabrisas trasero
+            g.FillPolygon(parabrisas, ventInferior);
             #endregion
         }
     }
