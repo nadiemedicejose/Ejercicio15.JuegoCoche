@@ -51,8 +51,8 @@ namespace Ejercicio15.JuegoCoche
             // Inicializar el puntaje en 0
             puntaje = 0;
             // Se crean las listas para los objetos
-            listaCirculoAuto = new List<Circulo>;
-            listaCuboAuto = new List<Cubo>;
+            listaCirculoAuto = new List<Circulo>();
+            listaCuboAuto = new List<Cubo>();
             // Se crea y se pinta el auto
             Auto1 = new Coche(posInicial_Auto1X, obj2);
             // Posición inicial del auto lo colocaré en el lado izquierdo
@@ -63,7 +63,7 @@ namespace Ejercicio15.JuegoCoche
             timerCar1.Start(); // Inicializa el auto
             timerGenObjCar1.Start(); // Inicializa los objetos (círculos y cubos)
             // Se asignan los métodos a los threads
-            th_objAuto = new Thread(new ThreadStart(ColisionCar));
+            th_objAuto = new Thread(new ThreadStart(colisionCar));
             // Se inicializan los hilos para detectar las colisiones
             th_objAuto.Start();
         }
@@ -146,28 +146,114 @@ namespace Ejercicio15.JuegoCoche
         }
 
         // Método de colisión del auto
+        private void colisionCar()
+        {
+            #region Colisiona con un cubo
+            while (true)
+            {
+                // Pausar el hilo para hacer el efecto del choque
+                try
+                {
+                    Thread.Sleep(10);
+                    if(Auto1.X == listaCuboAuto.ElementAt(0).X && listaCuboAuto.ElementAt(0).Y >= 390 && listaCuboAuto.ElementAt(0).Y <= 475)
+                    {
+                        // Colisión con el cubo pierde el juego
+                        inflateCubo(listaCuboAuto.ElementAt(0));
+                        Perdio();
+                        // Cancelo los hilos
+                        th_objAuto.Abort();
+                    } else if (listaCuboAuto.ElementAt(0).Y > 475)
+                    {
+                        listaCuboAuto.RemoveAt(0);
+                    }
+                } catch (ArgumentOutOfRangeException)
+                {
 
+                }
+                #endregion
+
+                #region Colisiona con un circulo
+                try
+                {
+                    if (Auto1.X == listaCirculoAuto.ElementAt(0).X && listaCirculoAuto.ElementAt(0).Y >= 390 && listaCirculoAuto.ElementAt(0).Y <= 475)
+                    {
+                        // Colisión con el cubo pierde el juego
+                        inflateCirculo(listaCirculoAuto.ElementAt(0));
+                        listaCirculoAuto.RemoveAt(0);
+                        puntaje++;
+                    }
+                    else if (listaCirculoAuto.ElementAt(0).Y > 475)
+                    {
+                        inflateCirculo(listaCirculoAuto.ElementAt(0));
+                        Perdio();
+                        th_objAuto.Abort();
+                    }
+                }
+                catch (ArgumentOutOfRangeException) { }
+            }
+        }
 
         #endregion
 
         private void Pista_Load(object sender, EventArgs e)
         {
-
+            IniciaJuego();
         }
 
         private void Carretera_Paint(object sender, PaintEventArgs e)
         {
+            carretera.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            Pen pluma = new Pen(Color.White, 4);
+            // Lineas del 1 al 3
+            carretera.DrawLine(pluma, new Point(0, 125), new Point(125, 250));
+            label1.Text = puntaje.ToString();
 
+            Auto1.Dibujar(e);
+
+            try
+            {
+                foreach(Circulo item in listaCirculoAuto)
+                {
+                    item.Dibujar(e);
+                }
+                foreach(Cubo item in listaCuboAuto)
+                {
+                    item.Dibujar(e);
+                }
+            }
+            catch (InvalidOperationException) { }
         }
 
         private void Pista_KeyDown(object sender, KeyEventArgs e)
         {
-
+            switch (e.KeyCode)
+            {
+                case Keys.Space:
+                    timerAnimationCar1.Start();
+                    break;
+                case Keys.R:
+                    th_objAuto.Abort();
+                    IniciaJuego();
+                    break;
+                case Keys.Q:
+                    th_objAuto.Abort();
+                    Application.Exit();
+                    break;
+            }
         }
 
         private void timerCar1_Tick(object sender, EventArgs e)
         {
-
+            // Lanzar los objetos
+            foreach (Circulo item in listaCirculoAuto)
+            {
+                item.Y += 6;
+            }
+            foreach (Cubo item in listaCuboAuto)
+            {
+                item.Y += 6;
+            }
+            Carretera.Refresh();
         }
 
         private void timerAnimationCar1_Tick(object sender, EventArgs e)
