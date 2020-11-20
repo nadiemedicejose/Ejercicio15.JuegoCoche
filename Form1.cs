@@ -194,6 +194,17 @@ namespace Ejercicio15.JuegoCoche
         }
 
         #endregion
+        #endregion
+
+        public void DibujarCarretera(PaintEventArgs e)
+        {
+            carretera = e.Graphics;
+            carretera.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            Pen pluma = new Pen(Color.White, 4);
+            // Lineas del 1 al 3
+            carretera.DrawLine(pluma, new Point(125, 0), new Point(125, Carretera.Height));
+            label1.Text = puntaje.ToString();
+        }
 
         private void Pista_Load(object sender, EventArgs e)
         {
@@ -202,12 +213,7 @@ namespace Ejercicio15.JuegoCoche
 
         private void Carretera_Paint(object sender, PaintEventArgs e)
         {
-            carretera.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            Pen pluma = new Pen(Color.White, 4);
-            // Lineas del 1 al 3
-            carretera.DrawLine(pluma, new Point(0, 125), new Point(125, 250));
-            label1.Text = puntaje.ToString();
-
+            DibujarCarretera(e);
             Auto1.Dibujar(e);
 
             try
@@ -258,12 +264,41 @@ namespace Ejercicio15.JuegoCoche
 
         private void timerAnimationCar1_Tick(object sender, EventArgs e)
         {
-
+            // Mover el auto a la izq o derecha
+            switch (edo_ActualAuto1)
+            {
+                case EstadoActualAuto.izquierdo:
+                    // Moverlo a la derecha
+                    if(Auto1.X < posInicial_Auto1X + 125)
+                    {
+                        Auto1.X += 9;
+                    } else
+                    {
+                        edo_ActualAuto1 = EstadoActualAuto.derecho;
+                        Auto1.X = posInicial_Auto1X + 125;
+                        timerAnimationCar1.Stop();
+                    }
+                    Carretera.Refresh();
+                    break;
+                case EstadoActualAuto.derecho:
+                    // Moverlo a la izquiera
+                    if(Auto1.X > posInicial_Auto1X)
+                    {
+                        Auto1.X -= 9;
+                    } else
+                    {
+                        edo_ActualAuto1 = EstadoActualAuto.izquierdo;
+                        Auto1.X = posInicial_Auto1X;
+                        timerAnimationCar1.Stop();
+                    }
+                    Carretera.Refresh();
+                    break;
+            }
         }
 
         private void timerGenObjCar1_Tick(object sender, EventArgs e)
         {
-
+            GenerarObjetoAuto1();
         }
     }
 }
