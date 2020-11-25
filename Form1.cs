@@ -179,16 +179,14 @@ namespace Ejercicio15.JuegoCoche
                     {
                         // Colisión con el cubo pierde el juego
                         inflateCirculo(listaCirculoAuto.ElementAt(0));
-
                         listaCirculoAuto.RemoveAt(0);
                         puntaje++;
                     }
                     else if (listaCirculoAuto.ElementAt(0).Y > 475)
                     {
                         inflateCirculo(listaCirculoAuto.ElementAt(0));
-                        listaCirculoAuto.RemoveAt(0);
-                        //Perdio();
-                        //th_objAuto.Abort();
+                        Perdio();
+                        th_objAuto.Abort();
                     }
                 }
                 catch (ArgumentOutOfRangeException) { }
