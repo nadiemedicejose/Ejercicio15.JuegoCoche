@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
+using Graphics3DS;
 
 namespace Ejercicio15.JuegoCoche
 {
@@ -78,7 +79,7 @@ namespace Ejercicio15.JuegoCoche
         }
 
         // Método que detecta la colisión y escala los objetos
-        public void inflateCubo(Cubo cubo)
+        public void inflateCubo(Cubo cubo) // #NoImplementado
         {
             // Realiza una escala de la figura al detectar la colisión
             for (int i = 1; i<5; i++)
@@ -95,7 +96,7 @@ namespace Ejercicio15.JuegoCoche
             }
         }
 
-        public void inflateCirculo(Circulo circulo)
+        public void inflateCirculo(Circulo circulo) // #NoImplementado
         {
             // Realiza una escala de la figura al detectar la colisión
             for (int i = 1; i < 5; i++)
@@ -127,7 +128,7 @@ namespace Ejercicio15.JuegoCoche
                 }
                 else
                 {
-                    // Es imar y aparece a la derecha
+                    // Es impar y aparece a la derecha
                     listaCirculoAuto.Add(new Circulo(new Point(177, 0), obj1));
                 }
             }
@@ -135,12 +136,12 @@ namespace Ejercicio15.JuegoCoche
             {
                 if (rnd.Next(21, 33) % 2 == 0) // Es un valor random entre 21 y 33, y es par
                 {
-                    listaCuboAuto.Add(new Cubo(new Point(52, 00), obj2));
+                    listaCuboAuto.Add(new Cubo(true, obj2));
                 }
                 else
                 {
-                    // Es imar y aparece a la derecha
-                    listaCuboAuto.Add(new Cubo(new Point(177, 0), obj2));
+                    // Es impar y aparece a la derecha
+                    listaCuboAuto.Add(new Cubo(false, obj2));
                 }
             }
         }
@@ -155,14 +156,16 @@ namespace Ejercicio15.JuegoCoche
                 try
                 {
                     Thread.Sleep(10);
-                    if(Auto1.X == listaCuboAuto.ElementAt(0).X && listaCuboAuto.ElementAt(0).Y >= 390 && listaCuboAuto.ElementAt(0).Y <= 475)
+                    if(Auto1.X == listaCuboAuto.ElementAt(0).X
+                        && listaCuboAuto.ElementAt(0).Y >= 370
+                        && listaCuboAuto.ElementAt(0).Y <= 461)
                     {
                         // Colisión con el cubo pierde el juego
                         inflateCubo(listaCuboAuto.ElementAt(0));
                         Perdio();
                         // Cancelo los hilos
                         th_objAuto.Abort();
-                    } else if (listaCuboAuto.ElementAt(0).Y > 475)
+                    } else if (listaCuboAuto.ElementAt(0).Y > 461)
                     {
                         listaCuboAuto.RemoveAt(0);
                     }
@@ -257,7 +260,10 @@ namespace Ejercicio15.JuegoCoche
             }
             foreach (Cubo item in listaCuboAuto)
             {
-                item.Y += 6;
+                for (int i = 0; i < item.cubito.Length; i++)
+                {
+                    item.cubito[i].Y += 6;
+                }
             }
             Carretera.Refresh();
         }
