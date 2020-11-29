@@ -74,9 +74,10 @@ namespace Ejercicio15.JuegoCoche
             #endregion
 
             #region Diseño del auto
-            Pen contorno = new Pen(RGB);
+            Pen contorno = new Pen(RGB, 5);
             Brush tech = new SolidBrush(RGB);
             Brush parabrisas = new SolidBrush(Color.Black);
+            Brush relleno = new SolidBrush(RGB);
 
             // Colocar el relleno para el auto
             g.FillClosedCurve(Brushes.White, auto);

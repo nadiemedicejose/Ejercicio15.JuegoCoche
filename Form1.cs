@@ -29,20 +29,26 @@ namespace Ejercicio15.JuegoCoche
         }
         Graphics carretera;
         Coche Auto1;
+        Coche Auto2;
         // Se definen los hilos para recorrer la pista
         Thread th_objAuto;
+        Thread th_objAuto2;
         // se definen las listas que almacenan los objetos
         List<Circulo> listaCirculoAuto;
         List<Cubo> listaCuboAuto;
         // Se definen los colores que se van a pasar como parámetros para pintar el auto, círculo y cubo
         Color obj1 = Color.Red;
+        Color objCar2 = Color.Blue;
         Color obj2 = Color.GreenYellow;
         // Se define la variable enum para saber de qué lado está el auto
         EstadoActualAuto edo_ActualAuto1;
+        EstadoActualAuto edo_ActualAuto2;
         // Definir la posición inicial del auto en el lado izquierdo
         const int posInicial_Auto1X = 52;
+        const int posInicial_Auto2X = 177;
         // Variable para inicializar el puntaje
         int puntaje;
+        int puntaje2;
         #endregion
 
         #region Métodos del juego
@@ -50,31 +56,53 @@ namespace Ejercicio15.JuegoCoche
         {
             // Inicializar el puntaje en 0
             puntaje = 0;
+            puntaje2 = 0;
             // Se crean las listas para los objetos
             listaCirculoAuto = new List<Circulo>();
             listaCuboAuto = new List<Cubo>();
             // Se crea y se pinta el auto
             Auto1 = new Coche(posInicial_Auto1X, obj2);
+            Auto2 = new Coche(posInicial_Auto2X, objCar2);
             // Posición inicial del auto lo colocaré en el lado izquierdo
             edo_ActualAuto1 = EstadoActualAuto.izquierdo;
+            edo_ActualAuto2 = EstadoActualAuto.derecho;
             // Generar el primer objeto (círculo y cubo)
             GenerarObjetoAuto1();
+
+
             // Se inicializan los timers
             timerCar1.Start(); // Inicializa el auto
             timerGenObjCar1.Start(); // Inicializa los objetos (círculos y cubos)
             // Se asignan los métodos a los threads
             th_objAuto = new Thread(new ThreadStart(colisionCar));
+            th_objAuto2 = new Thread(new ThreadStart(colisionCar2));
             // Se inicializan los hilos para detectar las colisiones
             th_objAuto.Start();
+            th_objAuto2.Start();
+
         }
 
         // Método que se ejecuta cuando se pierde en el juego (Colisión con obstáculo
         public void Perdio()
         {
             // Se detienen los cronómetros (timers)
+            String ganador;
             timerCar1.Stop();
             timerGenObjCar1.Stop();
-            MessageBox.Show("Has chocado con un obstáculo. Presiona R para volver a jugar", "Juego terminado", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            timerAnimationCar2.Stop();
+            if (puntaje > puntaje2)
+            {
+                ganador = "Gano el Jugador 1";
+            }
+            else if(puntaje<puntaje2)
+            {
+                ganador = "Gano el Jugador 2";
+            }
+            else
+            {
+                ganador = "Empate";
+            }
+            MessageBox.Show("Has chocado con un obstáculo.\nEl resultado fue: "+ganador+".\nPresiona R para volver a jugar", "Juego terminado", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         // Método que detecta la colisión y escala los objetos
@@ -192,10 +220,67 @@ namespace Ejercicio15.JuegoCoche
                     }
                 }
                 catch (ArgumentOutOfRangeException) { }
+                #endregion
             }
         }
 
-        #endregion
+
+
+
+        // Método de colisión del auto
+        private void colisionCar2()
+        {
+            #region Colisiona con un cubo
+            while (true)
+            {
+                // Pausar el hilo para hacer el efecto del choque
+                try
+                {
+                    Thread.Sleep(10);
+                    if (Auto2.X == listaCuboAuto.ElementAt(0).X && listaCuboAuto.ElementAt(0).Y >= 390 && listaCuboAuto.ElementAt(0).Y <= 475)
+                    {
+                        // Colisión con el cubo pierde el juego
+                        inflateCubo(listaCuboAuto.ElementAt(0));
+                        Perdio();
+                        // Cancelo los hilos
+                        th_objAuto2.Abort();
+                    }
+                    else if (listaCuboAuto.ElementAt(0).Y > 475)
+                    {
+                        listaCuboAuto.RemoveAt(0);
+                    }
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+
+                }
+                #endregion
+
+                #region Colisiona con un circulo
+                try
+                {
+                    if (Auto2.X == listaCirculoAuto.ElementAt(0).X && listaCirculoAuto.ElementAt(0).Y >= 390 && listaCirculoAuto.ElementAt(0).Y <= 475)
+                    {
+                        // Colisión con el cubo pierde el juego
+                        inflateCirculo(listaCirculoAuto.ElementAt(0));
+
+                        listaCirculoAuto.RemoveAt(0);
+                        puntaje2++;
+                    }
+                    else if (listaCirculoAuto.ElementAt(0).Y > 475)
+                    {
+                        inflateCirculo(listaCirculoAuto.ElementAt(0));
+                        listaCirculoAuto.RemoveAt(0);
+                        //Perdio();
+                        //th_objAuto.Abort();
+                    }
+                }
+                catch (ArgumentOutOfRangeException) { }
+                #endregion
+            }
+        }
+
+
         #endregion
 
         public void DibujarCarretera(PaintEventArgs e)
@@ -206,6 +291,7 @@ namespace Ejercicio15.JuegoCoche
             // Lineas del 1 al 3
             carretera.DrawLine(pluma, new Point(125, 0), new Point(125, Carretera.Height));
             label1.Text = puntaje.ToString();
+            label2.Text = puntaje2.ToString();
         }
 
         private void Pista_Load(object sender, EventArgs e)
@@ -217,6 +303,7 @@ namespace Ejercicio15.JuegoCoche
         {
             DibujarCarretera(e);
             Auto1.Dibujar(e);
+            Auto2.Dibujar(e);
 
             try
             {
@@ -239,12 +326,16 @@ namespace Ejercicio15.JuegoCoche
                 case Keys.Space:
                     timerAnimationCar1.Start();
                     break;
+                case Keys.NumPad0:
+                    timerAnimationCar2.Start();
+                    break;
                 case Keys.R:
                     th_objAuto.Abort();
                     IniciaJuego();
                     break;
                 case Keys.Q:
                     th_objAuto.Abort();
+                    th_objAuto2.Abort();
                     Application.Exit();
                     break;
             }
@@ -301,6 +392,42 @@ namespace Ejercicio15.JuegoCoche
         private void timerGenObjCar1_Tick(object sender, EventArgs e)
         {
             GenerarObjetoAuto1();
+        }
+
+        private void timerAnimationCar2_Tick(object sender, EventArgs e)
+        {
+            // Mover el auto a la izq o derecha
+            switch (edo_ActualAuto2)
+            {
+                case EstadoActualAuto.izquierdo:
+                    // Moverlo a la derecha
+                    if (Auto2.X < posInicial_Auto2X)
+                    {
+                        Auto2.X += 9;
+                    }
+                    else
+                    {
+                        edo_ActualAuto2 = EstadoActualAuto.derecho;
+                        Auto2.X = posInicial_Auto2X;
+                        timerAnimationCar2.Stop();
+                    }
+                    Carretera.Refresh();
+                    break;
+                case EstadoActualAuto.derecho:
+                    // Moverlo a la izquiera
+                    if (Auto2.X > posInicial_Auto2X - 125)
+                    {
+                        Auto2.X -= 9;
+                    }
+                    else
+                    {
+                        edo_ActualAuto2 = EstadoActualAuto.izquierdo;
+                        Auto2.X = posInicial_Auto2X - 125;
+                        timerAnimationCar2.Stop();
+                    }
+                    Carretera.Refresh();
+                    break;
+            }
         }
     }
 }
